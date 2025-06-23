@@ -20,54 +20,76 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
     @Override
     public LoanApplication uploadDocument(String applicationNumber, String documentType, MultipartFile file, boolean isValid) throws IOException {
-        LoanApplication app = repository.findByApplicationNumber(applicationNumber)
-                .orElseGet(() -> {
-                    LoanApplication newApp = new LoanApplication();
-                    newApp.setApplicationNumber(applicationNumber);
-                    return newApp;
-                });
+        // Get application or create new
+        LoanApplication application = repository.findByApplicationNumber(applicationNumber)
+                .orElse(new LoanApplication(applicationNumber));
 
+        // Set file data and validity based on document type
         byte[] fileData = file.getBytes();
 
         switch (documentType) {
-            case "identityProof" -> { app.setIdentityProof(fileData); app.setIsIdentityProofValid(isValid); }
-            case "addressProof" -> { app.setAddressProof(fileData); app.setIsAddressProofValid(isValid); }
-            case "photograph" -> { app.setPhotograph(fileData); app.setIsPhotographValid(isValid); }
-            case "incomeProof" -> { app.setIncomeProof(fileData); app.setIsIncomeProofValid(isValid); }
-            case "bankStatement" -> { app.setBankStatement(fileData); app.setIsBankStatementValid(isValid); }
-            case "propertyDocuments" -> { app.setPropertyDocuments(fileData); app.setIsPropertyDocumentsValid(isValid); }
-            case "employmentProof" -> { app.setEmploymentProof(fileData); app.setIsEmploymentProofValid(isValid); }
-            case "signature" -> { app.setSignature(fileData); app.setIsSignatureValid(isValid); }
+            case "identityProof" -> {
+                application.setIdentityProof(fileData);
+                application.setIsIdentityProofValid(isValid);
+            }
+            case "addressProof" -> {
+                application.setAddressProof(fileData);
+                application.setIsAddressProofValid(isValid);
+            }
+            case "photograph" -> {
+                application.setPhotograph(fileData);
+                application.setIsPhotographValid(isValid);
+            }
+            case "incomeProof" -> {
+                application.setIncomeProof(fileData);
+                application.setIsIncomeProofValid(isValid);
+            }
+            case "bankStatement" -> {
+                application.setBankStatement(fileData);
+                application.setIsBankStatementValid(isValid);
+            }
+            case "propertyDocuments" -> {
+                application.setPropertyDocuments(fileData);
+                application.setIsPropertyDocumentsValid(isValid);
+            }
+            case "employmentProof" -> {
+                application.setEmploymentProof(fileData);
+                application.setIsEmploymentProofValid(isValid);
+            }
+            case "signature" -> {
+                application.setSignature(fileData);
+                application.setIsSignatureValid(isValid);
+            }
             default -> throw new IllegalArgumentException("Invalid document type");
         }
 
-        return repository.save(app);
+        return repository.save(application);
     }
 
     @Override
     public LoanApplicationDTO getApplicationByNumber(String applicationNumber) {
-        LoanApplication app = repository.findByApplicationNumber(applicationNumber)
+        LoanApplication application = repository.findByApplicationNumber(applicationNumber)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
-        return mapToDTO(app);
+        return mapToDTO(application);
     }
 
-    private LoanApplicationDTO mapToDTO(LoanApplication app) {
+    private LoanApplicationDTO mapToDTO(LoanApplication application) {
         return new LoanApplicationDTO(
-                app.getApplicationNumber(),
+                application.getApplicationNumber(),
 
-                toBase64(app.getIdentityProof()), app.getIsIdentityProofValid(),
-                toBase64(app.getAddressProof()), app.getIsAddressProofValid(),
-                toBase64(app.getPhotograph()), app.getIsPhotographValid(),
-                toBase64(app.getIncomeProof()), app.getIsIncomeProofValid(),
-                toBase64(app.getBankStatement()), app.getIsBankStatementValid(),
-                toBase64(app.getPropertyDocuments()), app.getIsPropertyDocumentsValid(),
-                toBase64(app.getEmploymentProof()), app.getIsEmploymentProofValid(),
-                toBase64(app.getSignature()), app.getIsSignatureValid()
+                toBase64(application.getIdentityProof()), application.getIsIdentityProofValid(),
+                toBase64(application.getAddressProof()), application.getIsAddressProofValid(),
+                toBase64(application.getPhotograph()), application.getIsPhotographValid(),
+                toBase64(application.getIncomeProof()), application.getIsIncomeProofValid(),
+                toBase64(application.getBankStatement()), application.getIsBankStatementValid(),
+                toBase64(application.getPropertyDocuments()), application.getIsPropertyDocumentsValid(),
+                toBase64(application.getEmploymentProof()), application.getIsEmploymentProofValid(),
+                toBase64(application.getSignature()), application.getIsSignatureValid()
         );
     }
 
     private String toBase64(byte[] data) {
-        return data != null ? Base64.getEncoder().encodeToString(data) : null;
+        return (data != null) ? Base64.getEncoder().encodeToString(data) : null;
     }
 }

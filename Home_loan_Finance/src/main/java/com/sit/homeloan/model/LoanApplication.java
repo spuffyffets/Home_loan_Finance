@@ -8,41 +8,53 @@ import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 public class LoanApplication {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	public LoanApplication(String applicationNumber) {
+		this.applicationNumber = applicationNumber;
+	}
 
-    private String applicationNumber;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Lob private byte[] identityProof;
-    private Boolean isIdentityProofValid;
+	private String applicationNumber;
 
-    @Lob private byte[] addressProof;
-    private Boolean isAddressProofValid;
+	@Lob
+	private byte[] identityProof;
+	private Boolean isIdentityProofValid;
 
-    @Lob private byte[] photograph;
-    private Boolean isPhotographValid;
+	@Lob
+	private byte[] addressProof;
+	private Boolean isAddressProofValid;
 
-    @Lob private byte[] incomeProof;
-    private Boolean isIncomeProofValid;
+	@Lob
+	private byte[] photograph;
+	private Boolean isPhotographValid;
 
-    @Lob private byte[] bankStatement;
-    private Boolean isBankStatementValid;
+	@Lob
+	private byte[] incomeProof;
+	private Boolean isIncomeProofValid;
 
-    @Lob private byte[] propertyDocuments;
-    private Boolean isPropertyDocumentsValid;
+	@Lob
+	private byte[] bankStatement;
+	private Boolean isBankStatementValid;
 
-    @Lob private byte[] employmentProof;
-    private Boolean isEmploymentProofValid;
+	@Lob
+	private byte[] propertyDocuments;
+	private Boolean isPropertyDocumentsValid;
 
-    @Lob private byte[] signature;
-    private Boolean isSignatureValid;
+	@Lob
+	private byte[] employmentProof;
+	private Boolean isEmploymentProofValid;
 
-    // getters & setters
+	@Lob
+	private byte[] signature;
+	private Boolean isSignatureValid;
+
+	// getters & setters
 }
