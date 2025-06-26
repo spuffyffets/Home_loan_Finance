@@ -1,4 +1,4 @@
-package com.sit.homeloan.model;
+package com.sit.homeloan.enums;
 
 public enum Role {
     CUSTOMER,
