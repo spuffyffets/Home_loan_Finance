@@ -1,7 +1,6 @@
-package com.sit.homeloan.model;
+package com.sit.homeloan.enums;
 
 public enum Role {
-	ADMIN,
     CUSTOMER,
     LOAN_OFFICER,
     CREDIT_MANAGER,

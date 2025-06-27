@@ -2,7 +2,7 @@ package com.sit.homeloan.service;
 
 import com.sit.homeloan.model.User;
 
-public interface UserService {
+public interface AuthService {
     String registerUser(User user);
-    User login(String email, String password);
+    String loginUser(String email, String password);
 }

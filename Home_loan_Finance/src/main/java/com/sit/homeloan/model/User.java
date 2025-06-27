@@ -1,29 +1,28 @@
-
 package com.sit.homeloan.model;
 
+import com.sit.homeloan.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
+@Table(name = "users")
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String username;
-    private String name;
-    private String email;
-    private long phonenumber;
-    private String address;
 
+    private String fullName;
+    private String email;
+    private String phoneNumber;
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private boolean enabled = true;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Customer customer;
 }
