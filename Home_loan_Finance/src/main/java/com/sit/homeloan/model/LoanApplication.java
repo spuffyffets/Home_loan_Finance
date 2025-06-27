@@ -14,15 +14,12 @@ import lombok.NoArgsConstructor;
 @Entity
 public class LoanApplication {
 
-	public LoanApplication(String applicationNumber) {
-		this.applicationNumber = applicationNumber;
-	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String applicationNumber;
+
 
 	@Lob
 	private byte[] identityProof;

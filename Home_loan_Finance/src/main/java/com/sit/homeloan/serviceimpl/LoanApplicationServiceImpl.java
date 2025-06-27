@@ -2,11 +2,9 @@ package com.sit.homeloan.serviceimpl;
 
 import java.io.IOException;
 import java.util.Base64;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.sit.homeloan.dto.LoanApplicationDTO;
 import com.sit.homeloan.model.LoanApplication;
 import com.sit.homeloan.repository.LoanApplicationRepository;
@@ -19,12 +17,10 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
     private LoanApplicationRepository repository;
 
     @Override
-    public LoanApplication uploadDocument(String applicationNumber, String documentType, MultipartFile file, boolean isValid) throws IOException {
-        // Get application or create new
-        LoanApplication application = repository.findByApplicationNumber(applicationNumber)
-                .orElse(new LoanApplication(applicationNumber));
+    public LoanApplication uploadDocument(Long id, String documentType, MultipartFile file, boolean isValid) throws IOException {
+        LoanApplication application = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Loan application not found with id: " + id));
 
-        // Set file data and validity based on document type
         byte[] fileData = file.getBytes();
 
         switch (documentType) {
@@ -67,16 +63,16 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
     }
 
     @Override
-    public LoanApplicationDTO getApplicationByNumber(String applicationNumber) {
-        LoanApplication application = repository.findByApplicationNumber(applicationNumber)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+    public LoanApplicationDTO getApplicationById(Long id) {
+        LoanApplication application = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Loan application not found"));
 
         return mapToDTO(application);
     }
 
     private LoanApplicationDTO mapToDTO(LoanApplication application) {
         return new LoanApplicationDTO(
-                application.getApplicationNumber(),
+                application.getId(),
 
                 toBase64(application.getIdentityProof()), application.getIsIdentityProofValid(),
                 toBase64(application.getAddressProof()), application.getIsAddressProofValid(),

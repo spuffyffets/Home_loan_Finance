@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoanApplicationDTO {
-    private String applicationNumber;
+    private long id;
 
     private String identityProof;  // Base64 format
     private Boolean isIdentityProofValid;
