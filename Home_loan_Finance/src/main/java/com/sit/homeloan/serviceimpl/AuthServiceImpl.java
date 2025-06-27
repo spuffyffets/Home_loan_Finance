@@ -1,4 +1,4 @@
-package com.sit.homeloan.serviceimpl;
+package com.sit.homeloan.serviceImpl;
 
 import com.sit.homeloan.enums.Role;
 import com.sit.homeloan.model.Customer;
@@ -48,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
        
         if (user.getRole() == Role.CUSTOMER) {
             Customer customer = new Customer();
-            customer.setUser(savedUser);
+            customer.setUser(user);
             customerRepository.save(customer);
         }
 

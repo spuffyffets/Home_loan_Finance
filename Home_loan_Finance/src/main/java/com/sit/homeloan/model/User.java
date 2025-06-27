@@ -1,5 +1,6 @@
 package com.sit.homeloan.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.sit.homeloan.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,5 +25,8 @@ public class User {
     private boolean enabled = true;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonBackReference(value = "user-customer")
     private Customer customer;
+
+
 }
