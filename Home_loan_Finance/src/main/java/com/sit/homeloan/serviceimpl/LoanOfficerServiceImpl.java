@@ -1,4 +1,4 @@
-package com.sit.homeloan.serviceImpl;
+package com.sit.homeloan.serviceimpl;
 
 import com.sit.homeloan.enums.ApplicationStatus;
 import com.sit.homeloan.model.LoanApplication;

@@ -1,4 +1,4 @@
-package com.sit.homeloan.serviceImpl;
+package com.sit.homeloan.serviceimpl;
 
 import com.sit.homeloan.model.LoanApplication;
 import com.sit.homeloan.model.LoanStageHistory;

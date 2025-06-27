@@ -22,6 +22,7 @@ public class Customer {
     @MapsId
     @JoinColumn(name = "user_id")
     @JsonManagedReference(value = "user-customer") 
+   
     private User user;
 
     private String address;

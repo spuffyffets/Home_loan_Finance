@@ -1,5 +1,6 @@
 package com.sit.homeloan.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sit.homeloan.enums.DocumentType;
 import com.sit.homeloan.enums.VerificationStatus;
 import jakarta.persistence.*;
@@ -8,6 +9,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Data
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -18,6 +20,7 @@ public class Document {
     private Long id;
 
     @ManyToOne
+    @JsonIgnore
     private Customer customer;
 
     private String fileUrl;

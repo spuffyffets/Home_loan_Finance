@@ -26,6 +26,7 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonBackReference(value = "user-customer")
+   
     private Customer customer;
 
 
