@@ -13,7 +13,8 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "documents")
 public class Document {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

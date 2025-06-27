@@ -1,5 +1,8 @@
 package com.sit.homeloan.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sit.homeloan.enums.ApplicationStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,7 +20,9 @@ public class LoanApplication {
     private Long id;
 
     @ManyToOne
+    @JsonBackReference(value = "customer-loanApplications") 
     private Customer customer;
+
 
     private Double loanAmount;
     private Integer loanTenureInMonths;
