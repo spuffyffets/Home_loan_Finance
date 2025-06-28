@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +19,7 @@ public class SanctionLetter {
     private Long id;
 
     @OneToOne
+    @JsonIgnore
     private LoanApplication loanApplication;
 
     private LocalDate issueDate;
@@ -25,7 +28,7 @@ public class SanctionLetter {
     private Integer tenureInMonths;
     private String emiScheduleFileUrl;
 
-    // ✅ Static Bank Info
+    
     private String bankName = "Skills IT Academy Finance Ltd";
     private String bankBranch = "Karve Nagar";
 }

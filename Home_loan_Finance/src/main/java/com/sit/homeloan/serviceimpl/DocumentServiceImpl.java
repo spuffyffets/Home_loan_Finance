@@ -1,11 +1,14 @@
 package com.sit.homeloan.serviceimpl;
 
+import com.sit.homeloan.enums.ApplicationStatus;
 import com.sit.homeloan.enums.DocumentType;
 import com.sit.homeloan.enums.VerificationStatus;
 import com.sit.homeloan.model.Customer;
 import com.sit.homeloan.model.Document;
+import com.sit.homeloan.model.LoanApplication;
 import com.sit.homeloan.repository.CustomerRepository;
 import com.sit.homeloan.repository.DocumentRepository;
+import com.sit.homeloan.repository.LoanApplicationRepository;
 import com.sit.homeloan.service.DocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,9 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Autowired
     private DocumentRepository documentRepository;
+    
+    @Autowired
+    private LoanApplicationRepository loanApplicationRepository;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -55,6 +61,14 @@ public class DocumentServiceImpl implements DocumentService {
             doc.setVerificationStatus(VerificationStatus.PENDING);
 
             documentRepository.save(doc);
+            
+            List<LoanApplication> applications = loanApplicationRepository.findByCustomer_User_Email(email);
+            if (!applications.isEmpty()) {
+                LoanApplication latest = applications.get(applications.size() - 1); 
+                latest.setApplicationStatus(ApplicationStatus.DOCUMENT_SUBMITTED);
+                loanApplicationRepository.save(latest);
+            }
+
             return "Document uploaded successfully!";
         } catch (IOException e) {
             return "File upload failed!";

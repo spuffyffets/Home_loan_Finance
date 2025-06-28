@@ -65,6 +65,9 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setEmploymentType(dto.getEmploymentType());
         customer.setEmployerName(dto.getEmployerName());
         customer.setMonthlyIncome(dto.getMonthlyIncome());
+        customer.setBankAccountNumber(dto.getBankAccountNumber());
+        customer.setAccountHolderName(dto.getAccountHolderName());
+        customer.setIfscCode(dto.getIfscCode());
         customerRepository.save(customer);
 
         

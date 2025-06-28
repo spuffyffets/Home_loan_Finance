@@ -16,10 +16,6 @@ public class Disbursement {
 
     @OneToOne
     private LoanApplication loanApplication;
-
-    private String recipientName;
-    private String bankAccountNumber;
-    private String ifscCode;
     private Double disbursedAmount;
     private LocalDate disbursementDate;
     private String disbursementStatus;

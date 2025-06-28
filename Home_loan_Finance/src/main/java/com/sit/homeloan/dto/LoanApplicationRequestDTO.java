@@ -11,8 +11,11 @@ public class LoanApplicationRequestDTO {
     private String employmentType;
     private String employerName;
     private Double monthlyIncome;
-
     private Double loanAmount;
     private Integer loanTenureInMonths;
     private String loanPurpose;
+    private String bankAccountNumber;
+    private String ifscCode;
+    private String accountHolderName;
+
 }

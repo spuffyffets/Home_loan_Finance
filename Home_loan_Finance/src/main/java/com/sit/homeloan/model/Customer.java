@@ -32,6 +32,10 @@ public class Customer {
     private String panNumber;
     private String aadhaarNumber;
     private String kycStatus;
+    private String bankAccountNumber;
+    private String ifscCode;
+    private String accountHolderName;
+
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     @JsonManagedReference(value = "customer-loanApplications")
