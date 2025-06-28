@@ -11,7 +11,9 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "sanction_letters")
 public class SanctionLetter {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
@@ -22,4 +24,8 @@ public class SanctionLetter {
     private Double interestRate;
     private Integer tenureInMonths;
     private String emiScheduleFileUrl;
+
+    // ✅ Static Bank Info
+    private String bankName = "Skills IT Academy Finance Ltd";
+    private String bankBranch = "Karve Nagar";
 }

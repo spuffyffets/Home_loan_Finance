@@ -20,9 +20,15 @@ public class CreditManagerServiceImpl implements CreditManagerService {
     }
     @Override
     public void updateVerificationStatus(Long documentId, String status) {
-        Document document = creditManagerRepository.findById(documentId)
-                .orElseThrow(() -> new RuntimeException("Document not found with ID: " + documentId));
+        Document document = creditManagerRepository.findById(documentId).orElse(null);
+
+        if (document == null) {
+            throw new RuntimeException("Document not found with ID: " + documentId);
+        }
+
         document.setVerificationStatus(VerificationStatus.valueOf(status.toUpperCase()));
         creditManagerRepository.save(document);
     }
+    
 }
+
