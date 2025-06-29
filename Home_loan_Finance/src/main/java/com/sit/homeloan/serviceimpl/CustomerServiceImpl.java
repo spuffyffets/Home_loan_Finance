@@ -74,7 +74,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (!dto.getPanNumber().equals(customer.getPanNumber())) {
             return "PAN verification failed.";
         }
-
+ 
         
         double randomCibil = 650 + Math.random() * 200;
 

@@ -5,5 +5,6 @@ import java.util.List;
 
 public interface LoanOfficerService {
     List<LoanApplication> getAllPendingApplications();
-    String reviewCIBILAndRequestDocuments(Long applicationId, String officerEmail);
+    String reviewCIBILDecision(Long applicationId, String officerEmail, boolean reject, String reasonIfRejected);
+
 }

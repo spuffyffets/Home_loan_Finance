@@ -21,8 +21,11 @@ public class LoanOfficerController {
     }
 
     @PostMapping("/review-cibil")
-    public String reviewCIBILAndRequestDocs(@RequestParam Long applicationId,
-                                            @RequestParam String officerEmail) {
-        return loanOfficerService.reviewCIBILAndRequestDocuments(applicationId, officerEmail);
+    public String reviewCibilDecision(@RequestParam Long applicationId,
+                                      @RequestParam String officerEmail,
+                                      @RequestParam boolean reject,
+                                      @RequestParam(required = false) String reasonIfRejected) {
+        return loanOfficerService.reviewCIBILDecision(applicationId, officerEmail, reject, reasonIfRejected);
     }
+
 }

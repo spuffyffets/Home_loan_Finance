@@ -31,7 +31,9 @@ public class AuthServiceImpl implements AuthService {
         }
 
         
+        
         if (user.getRole() == Role.LOAN_OFFICER || user.getRole() == Role.CREDIT_MANAGER || user.getRole() == Role.DISBURSEMENT_MANAGER) {
+        	
             boolean roleTaken = userRepository.existsByRole(user.getRole());
             if (roleTaken) {
                 return "A user with role " + user.getRole().name() + " is already registered.";

@@ -11,6 +11,7 @@ import lombok.*;
 @Entity
 @Table(name = "users")
 public class User {
+	
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -22,11 +23,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private boolean enabled = true;
+//    private boolean enabled = true;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    
     @JsonBackReference(value = "user-customer")
-   
     private Customer customer;
 
 

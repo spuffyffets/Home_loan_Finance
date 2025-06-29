@@ -31,32 +31,44 @@ public class LoanOfficerServiceImpl implements LoanOfficerService {
     }
 
     @Override
-    public String reviewCIBILAndRequestDocuments(Long applicationId, String officerEmail) {
+    public String reviewCIBILDecision(Long applicationId, String officerEmail, boolean reject, String reasonIfRejected) {
         Optional<LoanApplication> applicationOpt = loanApplicationRepository.findById(applicationId);
         if (applicationOpt.isEmpty()) return "Loan application not found.";
 
         LoanApplication app = applicationOpt.get();
-
         if (app.getApplicationStatus() != ApplicationStatus.PENDING)
             return "Application is not in pending state.";
 
         Optional<User> officerOpt = userRepository.findByEmail(officerEmail);
         if (officerOpt.isEmpty()) return "Officer not found.";
 
-       
-        app.setApplicationStatus(ApplicationStatus.REQUESTED_DOCUMENTS);
-        loanApplicationRepository.save(app);
+        User officer = officerOpt.get();
 
-        
-        loanStageHistoryService.logStage(
-            app.getId(),
-            officerOpt.get().getFullName(),
-            officerOpt.get().getRole().name(),
-            ApplicationStatus.REQUESTED_DOCUMENTS.name(),
-            "CIBIL reviewed (" + app.getCibilScore() + "). Requested documents from customer."
-        );
-
-        return "CIBIL reviewed. Requested customer to upload documents.";
+        if (reject) {
+            app.setApplicationStatus(ApplicationStatus.REJECTED);
+            app.setRejectionReason(reasonIfRejected);
+            loanStageHistoryService.logStage(
+                app.getId(),
+                officer.getFullName(),
+                officer.getRole().name(),
+                ApplicationStatus.REJECTED.name(),
+                "Loan rejected due to: " + reasonIfRejected
+            );
+            loanApplicationRepository.save(app);
+            return "Application rejected successfully.";
+        } else {
+            app.setApplicationStatus(ApplicationStatus.REQUESTED_DOCUMENTS);
+            loanStageHistoryService.logStage(
+                app.getId(),
+                officer.getFullName(),
+                officer.getRole().name(),
+                ApplicationStatus.REQUESTED_DOCUMENTS.name(),
+                "CIBIL reviewed (" + app.getCibilScore() + "). Requested documents."
+            );
+            loanApplicationRepository.save(app);
+            return "CIBIL reviewed. Requested customer to upload documents.";
+        }
     }
+
 
 }
