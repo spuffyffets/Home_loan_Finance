@@ -27,8 +27,19 @@ public class LoanOfficerServiceImpl implements LoanOfficerService {
 
     @Override
     public List<LoanApplication> getAllPendingApplications() {
-        return loanApplicationRepository.findByApplicationStatus(ApplicationStatus.PENDING);
+        List<LoanApplication> applications = loanApplicationRepository.findByApplicationStatus(ApplicationStatus.PENDING);
+
+        for (LoanApplication app : applications) {
+            app.setCustomer(null);
+            app.setLoanStageHistories(null);
+            app.setCreditEvaluation(null);
+            app.setSanctionLetter(null);
+            app.setDisbursement(null);
+        }
+
+        return applications;
     }
+
 
     @Override
     public String reviewCIBILDecision(Long applicationId, String officerEmail, boolean reject, String reasonIfRejected) {

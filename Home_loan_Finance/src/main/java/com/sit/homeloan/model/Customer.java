@@ -18,30 +18,28 @@ public class Customer {
 	@Id
 	private Long id;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "user_id")
-    @JsonManagedReference(value = "user-customer") 
-   
-    private User user;
+	@OneToOne
+	@MapsId
+	@JoinColumn(name = "user_id")
+	@JsonManagedReference(value = "user-customer")
+	private User user;
 
-    private String address;
-    private String employmentType;
-    private String employerName;
-    private Double monthlyIncome;
-    private String panNumber;
-    private String aadhaarNumber;
-    private String kycStatus;
-    private String bankAccountNumber;
-    private String ifscCode;
-    private String accountHolderName;
+	private String address;
+	private String employmentType;
+	private String employerName;
+	private Double monthlyIncome;
+	private String panNumber;
+	private String aadhaarNumber;
+	private String kycStatus;
+	private String bankAccountNumber;
+	private String ifscCode;
+	private String accountHolderName;
 
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+//    @JsonManagedReference(value = "customer-loanApplications")
+	private List<LoanApplication> loanApplications;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-    @JsonManagedReference(value = "customer-loanApplications")
-    private List<LoanApplication> loanApplications;
-
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
-    @JsonIgnore 
-    private List<Document> documents;
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+	@JsonIgnore
+	private List<Document> documents;
 }

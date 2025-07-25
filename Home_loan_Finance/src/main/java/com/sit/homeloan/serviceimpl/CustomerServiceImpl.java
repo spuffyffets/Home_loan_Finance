@@ -1,7 +1,10 @@
 package com.sit.homeloan.serviceimpl;
 
+import com.sit.homeloan.dto.CustomerProfileDTO;
+import com.sit.homeloan.dto.LoanApplicationDTO;
 import com.sit.homeloan.dto.LoanApplicationRequestDTO;
 import com.sit.homeloan.enums.ApplicationStatus;
+import com.sit.homeloan.enums.DocumentType;
 import com.sit.homeloan.enums.VerificationStatus;
 import com.sit.homeloan.model.Customer;
 import com.sit.homeloan.model.Document;
@@ -14,143 +17,192 @@ import com.sit.homeloan.service.LoanStageHistoryService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
-    @Autowired
-    private CustomerRepository customerRepository;
+	@Autowired
+	private CustomerRepository customerRepository;
 
-    @Autowired
-    private LoanApplicationRepository loanApplicationRepository;
+	@Autowired
+	private LoanApplicationRepository loanApplicationRepository;
 
-    @Autowired
-    private DocumentRepository documentRepository;
+	@Autowired
+	private DocumentRepository documentRepository;
 
-    @Autowired
-    private LoanStageHistoryService loanStageHistoryService;
+	@Autowired
+	private LoanStageHistoryService loanStageHistoryService;
 
-    @Override
-    public Customer getCustomerProfile(String email) {
-        return customerRepository.findByUserEmail(email).orElse(null);
-    }
+	@Override
+	public CustomerProfileDTO getCustomerProfileDTO(String email) {
+		Optional<Customer> customerOpt = customerRepository.findByUserEmail(email);
+		if (customerOpt.isEmpty()) {
+			return null;
+		}
 
-    @Override
-    public String applyForLoan(LoanApplicationRequestDTO dto) {
-        Optional<Customer> customerOpt = customerRepository.findByUserEmail(dto.getEmail());
-        if (customerOpt.isEmpty()) {
-            return "Customer not found.";
-        }
+		Customer customer = customerOpt.get();
+		CustomerProfileDTO dto = new CustomerProfileDTO();
 
-        Customer customer = customerOpt.get();
+		dto.setFullName(customer.getUser().getFullName());
+		dto.setEmail(customer.getUser().getEmail());
+		dto.setPhoneNumber(customer.getUser().getPhoneNumber());
+		dto.setAddress(customer.getAddress());
+		dto.setEmploymentType(customer.getEmploymentType());
+		dto.setMonthlyIncome(customer.getMonthlyIncome());
+		dto.setPanNumber(customer.getPanNumber());
+		dto.setAadhaarNumber(customer.getAadhaarNumber());
+		dto.setKycStatus(customer.getKycStatus());
 
-       
-        List<LoanApplication> existingApplications = loanApplicationRepository.findByCustomer_User_Email(dto.getEmail());
-        if (!existingApplications.isEmpty()) {
-            return "You have already applied for a loan.";
-        }
+		return dto;
+	}
 
-        
-        if (customer.getPanNumber() == null || customer.getPanNumber().isEmpty()) {
-            customer.setPanNumber(dto.getPanNumber());
-        }
-        if (customer.getAadhaarNumber() == null || customer.getAadhaarNumber().isEmpty()) {
-            customer.setAadhaarNumber(dto.getAadhaarNumber());
-        }
-        customer.setAddress(dto.getAddress());
-        customer.setEmploymentType(dto.getEmploymentType());
-        customer.setEmployerName(dto.getEmployerName());
-        customer.setMonthlyIncome(dto.getMonthlyIncome());
-        customer.setBankAccountNumber(dto.getBankAccountNumber());
-        customer.setAccountHolderName(dto.getAccountHolderName());
-        customer.setIfscCode(dto.getIfscCode());
-        customerRepository.save(customer);
+	@Override
+	public String applyForLoan(LoanApplicationRequestDTO dto) {
+		Optional<Customer> customerOpt = customerRepository.findByUserEmail(dto.getEmail());
+		
+		if (customerOpt.isEmpty()) {
+			return "Customer not found.";
+		}
 
-        
-        if (!dto.getPanNumber().equals(customer.getPanNumber())) {
-            return "PAN verification failed.";
-        }
- 
-        
-        double randomCibil = 650 + Math.random() * 200;
+		Customer customer = customerOpt.get();
 
-        LoanApplication application = new LoanApplication();
-        application.setCustomer(customer);
-        application.setApplicationDate(LocalDate.now());
-        application.setApplicationStatus(ApplicationStatus.PENDING);
-        application.setCibilScore(randomCibil);
-        application.setLoanAmount(dto.getLoanAmount());
-        application.setLoanTenureInMonths(dto.getLoanTenureInMonths());
-        application.setLoanPurpose(dto.getLoanPurpose());
+		List<LoanApplication> existingApplications = loanApplicationRepository
+				.findByCustomer_User_Email(dto.getEmail());
+		if (!existingApplications.isEmpty()) {
+			return "You have already applied for a loan.";
+		}
 
-        loanApplicationRepository.save(application);
+		if (customer.getPanNumber() == null || customer.getPanNumber().isEmpty()) {
+			customer.setPanNumber(dto.getPanNumber());
+		}
+		if (customer.getAadhaarNumber() == null || customer.getAadhaarNumber().isEmpty()) {
+			customer.setAadhaarNumber(dto.getAadhaarNumber());
+		}
+		customer.setAddress(dto.getAddress());
+		customer.setEmploymentType(dto.getEmploymentType());
+		customer.setEmployerName(dto.getEmployerName());
+		customer.setMonthlyIncome(dto.getMonthlyIncome());
+		customer.setBankAccountNumber(dto.getBankAccountNumber());
+		customer.setAccountHolderName(dto.getAccountHolderName());
+		customer.setIfscCode(dto.getIfscCode());
+		customerRepository.save(customer);
 
-        loanStageHistoryService.logStage(
-            application.getId(),
-            customer.getUser().getFullName(),
-            customer.getUser().getRole().name(),
-            ApplicationStatus.PENDING.name(),
-            "Loan applied with CIBIL: " + randomCibil
-        );
+		if (!dto.getPanNumber().equals(customer.getPanNumber())) {
+			return "PAN verification failed.";
+		}
 
-        return "Loan application submitted. CIBIL score: " + (int) randomCibil;
-    }
+		double randomCibil = 650 + Math.random() * 200;
+		
 
+		LoanApplication application = new LoanApplication();
+		
+		application.setCustomer(customer);
+		application.setApplicationDate(LocalDate.now());
+		application.setApplicationStatus(ApplicationStatus.PENDING);
+		application.setCibilScore(randomCibil);
+		application.setLoanAmount(dto.getLoanAmount());
+		application.setLoanTenureInMonths(dto.getLoanTenureInMonths());
+		application.setLoanPurpose(dto.getLoanPurpose());
 
+		loanApplicationRepository.save(application);
 
+		loanStageHistoryService.logStage(application.getId(), customer.getUser().getFullName(),
+				customer.getUser().getRole().name(), ApplicationStatus.PENDING.name(),
+				"Loan applied with CIBIL: " + randomCibil);
 
-    @Override
-    public String uploadDocuments(String email, List<Document> documents) {
-        Optional<Customer> customerOpt = customerRepository.findByUserEmail(email);
-        if (customerOpt.isEmpty()) {
-            return "Customer not found.";
-        }
+		return "Loan application submitted. CIBIL score: " + (int) randomCibil;
+	}
 
-        Customer customer = customerOpt.get();
+	@Override
+	public String uploadDocument(MultipartFile file, String email, DocumentType documentType) {
+		Optional<Customer> customerOpt = customerRepository.findByUserEmail(email);
+		if (customerOpt.isEmpty()) {
+			return "Customer not found.";
+		}
 
-        for (Document doc : documents) {
-            doc.setCustomer(customer);
-            doc.setUploadDate(LocalDate.now());
-            doc.setVerificationStatus(VerificationStatus.PENDING);
-            documentRepository.save(doc);
-        }
+		Customer customer = customerOpt.get();
 
-        return documents.size() + " document(s) uploaded successfully.";
-    }
+		Document doc = new Document();
+		doc.setCustomer(customer);
+		doc.setDocumentType(documentType);
+		doc.setFileName(file.getOriginalFilename());
+		doc.setUploadDate(LocalDate.now());
+		doc.setVerificationStatus(VerificationStatus.PENDING);
+		documentRepository.save(doc);
 
-    @Override
-    public List<LoanApplication> getMyLoanApplications(String email) {
-        return loanApplicationRepository.findByCustomer_User_Email(email);
-    }
+		List<DocumentType> requiredDocs = Arrays.asList(DocumentType.AADHAAR, DocumentType.PAN,
+				DocumentType.SALARY_SLIP, DocumentType.BANK_STATEMENT, DocumentType.ADDRESS_PROOF,
+				DocumentType.EMPLOYMENT_PROOF, DocumentType.PROPERTY_DOCUMENT, DocumentType.PHOTO,
+				DocumentType.SIGNATURE);
 
-    @Override
-    public List<Document> getMyDocuments(String email) {
-        return documentRepository.findByCustomer_User_Email(email);
-    }
-    
-    @Override
-    public String deleteLoanApplication(Long applicationId, String email) {
-        Optional<LoanApplication> applicationOpt = loanApplicationRepository.findById(applicationId);
-        if (applicationOpt.isEmpty()) {
-            return "Loan application not found.";
-        }
+		List<Document> uploadedDocs = documentRepository.findByCustomer_User_Email(email);
+		Set<DocumentType> uploadedTypes = uploadedDocs.stream().map(Document::getDocumentType)
+				.collect(Collectors.toSet());
 
-        LoanApplication application = applicationOpt.get();
+		boolean allUploaded = requiredDocs.stream().allMatch(uploadedTypes::contains);
 
-        if (!application.getCustomer().getUser().getEmail().equals(email)) {
-            return "Unauthorized deletion attempt.";
-        }
+		if (allUploaded) {
+			List<LoanApplication> apps = loanApplicationRepository.findByCustomer_User_Email(email);
+			if (!apps.isEmpty()) {
+				LoanApplication app = apps.get(0);
+				app.setApplicationStatus(ApplicationStatus.DOCUMENT_SUBMITTED);
+				loanApplicationRepository.save(app);
+			}
+		}
 
-        loanApplicationRepository.delete(application);
-        return "Loan application deleted successfully.";
-    }
+		return documentType + " uploaded successfully.";
+	}
 
+	@Override
+	public List<LoanApplicationDTO> getMyLoanApplications(String email) {
+		List<LoanApplication> applications = loanApplicationRepository.findByCustomer_User_Email(email);
+		List<LoanApplicationDTO> dtoList = new ArrayList<>();
 
-    
-    
-    
+		for (LoanApplication app : applications) {
+			LoanApplicationDTO dto = new LoanApplicationDTO();
+			dto.setId(app.getId());
+			dto.setLoanAmount(app.getLoanAmount());
+			dto.setLoanTenureInMonths(app.getLoanTenureInMonths());
+			dto.setLoanPurpose(app.getLoanPurpose());
+			dto.setApplicationStatus(app.getApplicationStatus().name());
+			dto.setApplicationDate(app.getApplicationDate());
+			dto.setCibilScore(app.getCibilScore());
+
+			dtoList.add(dto);
+		}
+
+		return dtoList;
+	}
+
+	@Override
+	public List<Document> getMyDocuments(String email) {
+		return documentRepository.findByCustomer_User_Email(email);
+	}
+
+	@Override
+	public String deleteLoanApplication(Long applicationId, String email) {
+		Optional<LoanApplication> applicationOpt = loanApplicationRepository.findById(applicationId);
+		if (applicationOpt.isEmpty()) {
+			return "Loan application not found.";
+		}
+
+		LoanApplication application = applicationOpt.get();
+
+		if (!application.getCustomer().getUser().getEmail().equalsIgnoreCase(email)) {
+			return "Unauthorized deletion attempt.";
+		}
+
+		loanApplicationRepository.delete(application);
+		return "Loan application deleted successfully.";
+	}
+
 }

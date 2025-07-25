@@ -10,4 +10,5 @@ import java.util.List;
 public interface CreditManagerRepository extends JpaRepository<Document, Long> {
 	
     List<Document> getByCustomer_Id( Long customerId);
+    
 }

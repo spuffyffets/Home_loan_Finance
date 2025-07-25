@@ -25,6 +25,10 @@ public class Document {
 
     private String fileUrl;
     private LocalDate uploadDate;
+    
+    @Column(name = "file_name")
+    private String fileName;
+
 
     @Enumerated(EnumType.STRING)
     private DocumentType documentType;
