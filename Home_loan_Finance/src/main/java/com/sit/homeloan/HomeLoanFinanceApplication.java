@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class HomeLoanFinanceApplication {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) {	
 
 		SpringApplication.run(HomeLoanFinanceApplication.class, args);
 	}

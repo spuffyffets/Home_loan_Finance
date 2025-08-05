@@ -11,5 +11,6 @@ public interface LoanApplicationRepository extends JpaRepository<LoanApplication
     List<LoanApplication> findByCustomer_User_Email(String email);
     
     List<LoanApplication> findByApplicationStatus(ApplicationStatus status);
+    
 
 }

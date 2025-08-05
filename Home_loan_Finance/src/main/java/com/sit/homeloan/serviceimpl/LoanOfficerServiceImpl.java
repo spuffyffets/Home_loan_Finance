@@ -1,5 +1,7 @@
 package com.sit.homeloan.serviceimpl;
 
+import com.sit.homeloan.dto.LoanApplicationDTO;
+
 import com.sit.homeloan.enums.ApplicationStatus;
 import com.sit.homeloan.model.LoanApplication;
 import com.sit.homeloan.model.User;
@@ -10,76 +12,86 @@ import com.sit.homeloan.service.LoanStageHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class LoanOfficerServiceImpl implements LoanOfficerService {
 
-    @Autowired
-    private LoanApplicationRepository loanApplicationRepository;
+	@Autowired
+	private LoanApplicationRepository loanApplicationRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+	@Autowired
+	private UserRepository userRepository;
 
-    @Autowired
-    private LoanStageHistoryService loanStageHistoryService;
+	@Autowired
+	private LoanStageHistoryService loanStageHistoryService;
 
-    @Override
-    public List<LoanApplication> getAllPendingApplications() {
-        List<LoanApplication> applications = loanApplicationRepository.findByApplicationStatus(ApplicationStatus.PENDING);
+	@Override
+	public List<LoanApplicationDTO> getAllPendingApplications() {
 
-        for (LoanApplication app : applications) {
-            app.setCustomer(null);
-            app.setLoanStageHistories(null);
-            app.setCreditEvaluation(null);
-            app.setSanctionLetter(null);
-            app.setDisbursement(null);
-        }
+		List<LoanApplication> applications = loanApplicationRepository
+				.findByApplicationStatus(ApplicationStatus.PENDING);
+		List<LoanApplicationDTO> dtos = new ArrayList<>();
 
-        return applications;
-    }
+		for (LoanApplication app : applications) {
 
+			LoanApplicationDTO dto = new LoanApplicationDTO();
+			dto.setId(app.getId());
+			dto.setApplicantName(app.getCustomer().getUser().getFullName());
+			dto.setLoanAmount(app.getLoanAmount());
+			dto.setLoanTenureInMonths(app.getLoanTenureInMonths());
+			dto.setLoanPurpose(app.getLoanPurpose());
+			dto.setApplicationDate(app.getApplicationDate());
+			dto.setCibilScore(app.getCibilScore());
+			dto.setApplicationStatus(app.getApplicationStatus().toString());
+			dtos.add(dto);
+		}
 
-    @Override
-    public String reviewCIBILDecision(Long applicationId, String officerEmail, boolean reject, String reasonIfRejected) {
-        Optional<LoanApplication> applicationOpt = loanApplicationRepository.findById(applicationId);
-        if (applicationOpt.isEmpty()) return "Loan application not found.";
+		return dtos;
+	}
+	
 
-        LoanApplication app = applicationOpt.get();
-        if (app.getApplicationStatus() != ApplicationStatus.PENDING)
-            return "Application is not in pending state.";
+	@Override
+	public String reviewCIBILDecision(Long applicationId, String officerEmail, boolean reject,
+			String reasonIfRejected) {
+		Optional<LoanApplication> applicationOpt = loanApplicationRepository.findById(applicationId);
+		
+		if (applicationOpt.isEmpty())
+			return "Loan application not found.";
 
-        Optional<User> officerOpt = userRepository.findByEmail(officerEmail);
-        if (officerOpt.isEmpty()) return "Officer not found.";
+		LoanApplication app = applicationOpt.get();
+		
+		if (app.getApplicationStatus() != ApplicationStatus.PENDING)
+			return "Application is not in pending state.";
 
-        User officer = officerOpt.get();
+		Optional<User> officerOpt = userRepository.findByEmail(officerEmail);
+		
+		if (officerOpt.isEmpty())
+			return "Officer not found.";
 
-        if (reject) {
-            app.setApplicationStatus(ApplicationStatus.REJECTED);
-            app.setRejectionReason(reasonIfRejected);
-            loanStageHistoryService.logStage(
-                app.getId(),
-                officer.getFullName(),
-                officer.getRole().name(),
-                ApplicationStatus.REJECTED.name(),
-                "Loan rejected due to: " + reasonIfRejected
-            );
-            loanApplicationRepository.save(app);
-            return "Application rejected successfully.";
-        } else {
-            app.setApplicationStatus(ApplicationStatus.REQUESTED_DOCUMENTS);
-            loanStageHistoryService.logStage(
-                app.getId(),
-                officer.getFullName(),
-                officer.getRole().name(),
-                ApplicationStatus.REQUESTED_DOCUMENTS.name(),
-                "CIBIL reviewed (" + app.getCibilScore() + "). Requested documents."
-            );
-            loanApplicationRepository.save(app);
-            return "CIBIL reviewed. Requested customer to upload documents.";
-        }
-    }
+		User officer = officerOpt.get();
 
+		
+		if (reject) {
+			app.setApplicationStatus(ApplicationStatus.REJECTED);
+			app.setRejectionReason(reasonIfRejected);
+			loanStageHistoryService.logStage(app.getId(), officer.getFullName(), officer.getRole().name(),
+					ApplicationStatus.REJECTED.name(), "Loan rejected due to: " + reasonIfRejected);
+			loanApplicationRepository.save(app);
+			return "Application rejected successfully.";
+		} else {
+			app.setApplicationStatus(ApplicationStatus.REQUESTED_DOCUMENTS);
+			
+			
+			loanStageHistoryService.logStage(app.getId(), officer.getFullName(), officer.getRole().name(),
+					ApplicationStatus.REQUESTED_DOCUMENTS.name(),
+					"CIBIL reviewed (" + app.getCibilScore() + "). Requested documents.");
+			loanApplicationRepository.save(app);
+			return "CIBIL reviewed. Requested customer to upload documents.";
+		}
+
+	}
 
 }

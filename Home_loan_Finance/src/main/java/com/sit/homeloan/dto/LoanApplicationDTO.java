@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 public class LoanApplicationDTO {
     private Long id;
+    private String applicantName;
     private Double loanAmount;
     private Integer loanTenureInMonths;
     private String loanPurpose;

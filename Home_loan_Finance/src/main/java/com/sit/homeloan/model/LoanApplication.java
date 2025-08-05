@@ -20,7 +20,7 @@ public class LoanApplication {
     private Long id;
 
     @ManyToOne
-//    @JsonBackReference(value = "customer-loanApplications") 
+    @JsonBackReference(value = "customer-loanApplications") 
     @JsonIgnore
     private Customer customer;
 

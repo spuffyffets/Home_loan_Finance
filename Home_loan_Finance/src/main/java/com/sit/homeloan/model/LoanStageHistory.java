@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,6 +17,7 @@ public class LoanStageHistory {
     private Long id;
 
     @ManyToOne
+    @JsonBackReference
     private LoanApplication loanApplication;
 
     private String updatedByRole;

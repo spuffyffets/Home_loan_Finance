@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface DocumentRepository extends JpaRepository<Document, Long> {
     List<Document> findByCustomer_User_Email(String email);
-
+    
+    List<Document> findByCustomerId(Long customerId);
 }
 

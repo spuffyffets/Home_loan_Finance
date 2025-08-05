@@ -1,6 +1,7 @@
 package com.sit.homeloan.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.sit.homeloan.enums.DocumentType;
 import com.sit.homeloan.enums.VerificationStatus;
 import jakarta.persistence.*;
@@ -22,8 +23,15 @@ public class Document {
     @ManyToOne
     @JsonIgnore
     private Customer customer;
+// private String fileUrl;
+    
+    @Lob
+    @Column(name = "file_data", columnDefinition = "LONGBLOB")
+    private byte[] fileData;
 
-    private String fileUrl;
+    @Column(name = "file_type")
+    private String fileType;
+
     private LocalDate uploadDate;
     
     @Column(name = "file_name")

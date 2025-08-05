@@ -14,26 +14,26 @@ import java.util.List;
 @Service
 public class LoanStageHistoryServiceImpl implements LoanStageHistoryService {
 
-    @Autowired
-    private LoanStageHistoryRepository loanStageHistoryRepository;
+	@Autowired
+	private LoanStageHistoryRepository loanStageHistoryRepository;
 
-    @Autowired
-    private LoanApplicationRepository loanApplicationRepository;
+	@Autowired
+	private LoanApplicationRepository loanApplicationRepository;
 
-    @Override
-    public void logStage(Long appId, String updatedBy, String role, String stage, String remarks) {
-        LoanStageHistory history = new LoanStageHistory();
-        history.setLoanApplication(loanApplicationRepository.findById(appId).get());
-        history.setUpdatedByName(updatedBy);
-        history.setUpdatedByRole(role);
-        history.setStage(stage);
-        history.setRemarks(remarks);
-        history.setUpdatedAt(LocalDateTime.now());
-        loanStageHistoryRepository.save(history);
-    }
+	@Override
+	public void logStage(Long appId, String updatedBy, String role, String stage, String remarks) {
+		LoanStageHistory history = new LoanStageHistory();
+		history.setLoanApplication(loanApplicationRepository.findById(appId).get());
+		history.setUpdatedByName(updatedBy);
+		history.setUpdatedByRole(role);
+		history.setStage(stage);
+		history.setRemarks(remarks);
+		history.setUpdatedAt(LocalDateTime.now());
+		loanStageHistoryRepository.save(history);
+	}
 
-    @Override
-    public List<LoanStageHistory> getLoanHistory(Long appId) {
-        return loanStageHistoryRepository.findByLoanApplicationId(appId);
-    }
+	@Override
+	public List<LoanStageHistory> getLoanHistory(Long appId) {
+		return loanStageHistoryRepository.findByLoanApplicationId(appId);
+	}
 }
