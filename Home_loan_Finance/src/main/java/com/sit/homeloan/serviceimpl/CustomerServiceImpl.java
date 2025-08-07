@@ -146,51 +146,6 @@ public class CustomerServiceImpl implements CustomerService {
 		return "Loan application submitted. CIBIL score: " + (int) randomCibil;
 	}
 
-//	@Override
-//	public String uploadDocument(MultipartFile file, String email, DocumentType documentType) {
-//		Optional<Customer> customerOpt = customerRepository.findByUserEmail(email);
-//		if (customerOpt.isEmpty()) {
-//			return "Customer not found!";
-//		}
-//		try {
-//			
-//			File uploadFolder = new File(uploadDir);
-//			if (!uploadFolder.exists()) {
-//				uploadFolder.mkdirs();
-//			}
-//			
-//			
-//
-//			String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();// 34554jhkjdfkjf-fjgjfdjkfj243_pancard.pdf
-//			
-//			File dest = new File(uploadDir, fileName);
-//			
-//			file.transferTo(dest);
-//
-//			Document doc = new Document();
-//			
-//			doc.setCustomer(customerOpt.get());
-//			doc.setFileUrl(dest.getAbsolutePath());
-//			doc.setFileName(fileName);
-//			doc.setUploadDate(LocalDate.now());
-//			doc.setDocumentType(documentType);
-//			doc.setVerificationStatus(VerificationStatus.PENDING);
-//
-//			documentRepository.save(doc);
-//
-//			List<LoanApplication> applications = loanApplicationRepository.findByCustomer_User_Email(email);
-//			if (!applications.isEmpty()) {
-//				LoanApplication latest = applications.get(applications.size() - 1);
-//				latest.setApplicationStatus(ApplicationStatus.DOCUMENT_SUBMITTED);
-//				loanApplicationRepository.save(latest);
-//			}
-//
-//			return "Document uploaded successfully!";
-//		} catch (IOException e) {
-//			return "File upload failed!";
-//		}
-//	}
-	
 	@Override
 	public String uploadDocument(MultipartFile file, String email, DocumentType documentType) {
 		Optional<Customer> customerOpt = customerRepository.findByUserEmail(email);
@@ -200,10 +155,9 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 
 		try {
-			
+
 			byte[] fileBytes = file.getBytes();
 
-			
 			Document doc = new Document();
 			doc.setCustomer(customerOpt.get());
 			doc.setFileData(fileBytes);
@@ -224,7 +178,7 @@ public class CustomerServiceImpl implements CustomerService {
 				List<Document> uploadedDocs = documentRepository.findByCustomer_User_Email(email);
 
 				Set<DocumentType> uploadedTypes = new HashSet<>();
-				
+
 				for (Document d : uploadedDocs) {
 					uploadedTypes.add(d.getDocumentType());
 				}
@@ -244,24 +198,6 @@ public class CustomerServiceImpl implements CustomerService {
 		}
 	}
 
-//	@Override
-//	public ResponseEntity<Resource> downloadDocument(String fileName) {
-//	    try {
-//	        Path filePath = Paths.get("C:/uploads").resolve(fileName).normalize();
-//	        Resource resource = new UrlResource(filePath.toUri());
-//
-//	        if (resource.exists()) {
-//	            return ResponseEntity.ok()
-//	                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-//	                    .body(resource);
-//	        } else {
-//	            return ResponseEntity.notFound().build();
-//	        }
-//	    } catch (Exception ex) {
-//	        return ResponseEntity.internalServerError().build();
-//	    }
-//	}
-//	
 	@Override
 	public ResponseEntity<Resource> downloadDocument(String fileName) {
 		List<Document> documents = documentRepository.findAll();
@@ -279,17 +215,11 @@ public class CustomerServiceImpl implements CustomerService {
 		return ResponseEntity.notFound().build();
 	}
 
-	
-	
-	
-	
 	@Override
 	public List<Document> getMyDocuments(String email) {
 		return documentRepository.findByCustomer_User_Email(email);
 	}
 
-	
-	
 	@Override
 	public List<LoanApplicationDTO> getMyLoanApplications(String email) {
 		List<LoanApplication> applications = loanApplicationRepository.findByCustomer_User_Email(email);

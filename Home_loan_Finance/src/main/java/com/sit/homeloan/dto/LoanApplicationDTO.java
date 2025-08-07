@@ -16,6 +16,7 @@ public class LoanApplicationDTO {
     private String applicationStatus;
     private LocalDate applicationDate;
     private Double cibilScore;
+    
 }
 
 

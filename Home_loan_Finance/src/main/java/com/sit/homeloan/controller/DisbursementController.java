@@ -12,14 +12,14 @@ public class DisbursementController {
 
     @Autowired
     private DisbursementService disbursementService;
-
-    @GetMapping("/view/{loanAppId}")
-    public ResponseEntity<?> getDisbursementByLoanAppId(@PathVariable Long loanAppId) {
-        return disbursementService.getByLoanAppId(loanAppId);
-    }
+//
+//    @GetMapping("/view/{loanAppId}")
+//    public ResponseEntity<?> getDisbursementByLoanAppId(@PathVariable Long loanAppId) {
+//        return disbursementService.getByLoanAppId(loanAppId);
+//    }
 
     @PostMapping("/do/{loanAppId}")
-    public ResponseEntity<String> disburseLoan(@PathVariable Long loanAppId, @RequestBody Disbursement disbursement) {
+    public String disburseLoan(@PathVariable Long loanAppId, @RequestBody Disbursement disbursement) {
         return disbursementService.disburseLoan(loanAppId, disbursement.getDisbursedAmount());
     }
 

@@ -26,23 +26,21 @@ public class DisbursementServiceImpl implements DisbursementService {
 
     @Autowired
     private LoanApplicationRepository loanApplicationRepository;
-
+    
     @Override
-    public ResponseEntity<String> disburseLoan(Long loanAppId, Double amount) {
+    public String disburseLoan(Long loanAppId, Double amount) {
         Optional<LoanApplication> loanAppOpt = loanApplicationRepository.findById(loanAppId);
         if (loanAppOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Loan Application not found with ID: " + loanAppId);
+            return "Loan Application not found with ID: " + loanAppId;
         }
 
         LoanApplication loanApp = loanAppOpt.get();
 
         if (disbursementRepository.findByLoanApplication(loanApp).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Disbursement already exists for this Loan Application.");
+            return "Disbursement already exists for this Loan Application.";
         }
 
-        
+        // Create new disbursement
         Disbursement disbursement = new Disbursement();
         disbursement.setLoanApplication(loanApp);
         disbursement.setDisbursedAmount(amount);
@@ -50,11 +48,11 @@ public class DisbursementServiceImpl implements DisbursementService {
         disbursement.setDisbursementStatus("DISBURSED");
         disbursementRepository.save(disbursement);
 
-        
+        // Update loan application status
         loanApp.setApplicationStatus(ApplicationStatus.DISBURSED);
         loanApplicationRepository.save(loanApp);
 
-        
+        // Log loan stage
         loanStageHistoryService.logStage(
             loanApp.getId(),
             "Disbursement Manager",
@@ -63,9 +61,9 @@ public class DisbursementServiceImpl implements DisbursementService {
             "Loan disbursed successfully."
         );
 
-       
-        return ResponseEntity.ok("Loan Disbursed Successfully for LoanApp ID: " + loanAppId);
+        return "Loan Disbursed Successfully for LoanApp ID: " + loanAppId;
     }
+
 
 
     @Override

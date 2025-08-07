@@ -11,5 +11,5 @@ import lombok.Data;
 public class LoanWithDocumentsDTO {
 
     private LoanApplication loan;
-    private List<Document> documents;
+    private List<DocumentDto> documents;;
 }
