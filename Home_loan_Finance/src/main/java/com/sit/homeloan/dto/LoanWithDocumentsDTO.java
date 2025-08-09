@@ -3,7 +3,7 @@ package com.sit.homeloan.dto;
 import java.util.List;
 
 
-import com.sit.homeloan.model.Document;
+import com.sit.homeloan.model.Documents;
 import com.sit.homeloan.model.LoanApplication;
 
 import lombok.Data;

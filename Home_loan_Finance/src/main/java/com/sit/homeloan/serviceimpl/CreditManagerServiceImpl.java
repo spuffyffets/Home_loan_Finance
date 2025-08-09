@@ -1,6 +1,7 @@
 package com.sit.homeloan.serviceimpl;
 
 import com.sit.homeloan.dto.DocumentDto;
+
 import com.sit.homeloan.dto.LoanApplicationDTO;
 import com.sit.homeloan.dto.LoanApplicationDetailsDTO;
 import com.sit.homeloan.dto.LoanApplicationforsanctionDTO;
@@ -9,7 +10,7 @@ import com.sit.homeloan.enums.ApplicationStatus;
 import com.sit.homeloan.enums.VerificationStatus;
 import com.sit.homeloan.model.CreditEvaluation;
 import com.sit.homeloan.model.Customer;
-import com.sit.homeloan.model.Document;
+import com.sit.homeloan.model.Documents;
 import com.sit.homeloan.model.LoanApplication;
 import com.sit.homeloan.model.SanctionLetter;
 import com.sit.homeloan.repository.CreditEvaluationRepository;
@@ -21,6 +22,10 @@ import com.sit.homeloan.service.CreditManagerService;
 import com.sit.homeloan.service.LoanStageHistoryService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -93,13 +98,14 @@ public class CreditManagerServiceImpl implements CreditManagerService {
 			return null;
 
 		Customer customer = loan.getCustomer();
-		List<Document> documents = customer != null ? documentRepository.findByCustomerId(customer.getId())
+		List<Documents> documents = customer != null ? documentRepository.findByCustomerId(customer.getId())
 				: new ArrayList<>();
 
 		List<DocumentDto> docDtos = documents.stream().map(doc -> {
 			DocumentDto d = new DocumentDto();
 			d.setId(doc.getId());
 			d.setName(doc.getFileName());
+			d.setFileType(doc.getFileType());
 			d.setDocumentType(doc.getDocumentType().name());
 			d.setVerificationStatus(doc.getVerificationStatus().name());
 
@@ -116,12 +122,35 @@ public class CreditManagerServiceImpl implements CreditManagerService {
 
 		return dto;
 	}
+	
+	
+	
+
+	@Override
+	public ResponseEntity<Resource> downloadDocument(String fileName) {
+	    List<Documents> documents = documentRepository.findAll();
+
+	    for (Documents doc : documents) {
+	        if (doc.getFileName().equals(fileName)) {
+	            ByteArrayResource resource = new ByteArrayResource(doc.getFileData());
+
+	            return ResponseEntity.ok()
+	                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + doc.getFileName() + "\"")
+	                    .header(HttpHeaders.CONTENT_TYPE, doc.getFileType())
+	                    .body(resource);
+	        }
+	    }
+
+	    return ResponseEntity.notFound().build();
+	}
+
+
 
 	@Override
 	public void updateVerificationStatus(Long documentId, String status) {
 		try {
 
-			Document document = creditManagerRepository.findById(documentId).orElse(null);
+			Documents document = creditManagerRepository.findById(documentId).orElse(null);
 
 			if (document == null) {
 				throw new RuntimeException("Document not found with ID: " + documentId);
@@ -153,13 +182,13 @@ public class CreditManagerServiceImpl implements CreditManagerService {
 					app.getApplicationStatus().name(),
 					"Updated document verification: " + document.getDocumentType() + " to " + status);
 
-			List<Document> allDocuments = documentRepository.findByCustomerId(customer.getId());
+			List<Documents> allDocuments = documentRepository.findByCustomerId(customer.getId());
 			if (allDocuments == null || allDocuments.isEmpty()) {
 				throw new RuntimeException("No documents found for customer");
 			}
 
 			boolean allVerified = true;
-			for (Document doc : allDocuments) {
+			for (Documents doc : allDocuments) {
 				if (!VerificationStatus.VERIFIED.equals(doc.getVerificationStatus())) {
 					allVerified = false;
 					break;
@@ -225,12 +254,12 @@ public class CreditManagerServiceImpl implements CreditManagerService {
 
 		Long customerId = loanApp.getCustomer().getId();
 
-		List<Document> documentList = creditManagerRepository.getByCustomer_Id(customerId);
+		List<Documents> documentList = creditManagerRepository.getByCustomer_Id(customerId);
 
 		boolean allVerified = true;
 
 		for (int i = 0; i < documentList.size(); i++) {
-			Document doc = documentList.get(i);
+			Documents doc = documentList.get(i);
 
 			if (!doc.getVerificationStatus().equals(VerificationStatus.VERIFIED)) {
 				allVerified = false;

@@ -15,7 +15,7 @@ public class LoanApplicationforsanctionDTO {
     private String loanPurpose;
     private String applicationStatus;
     
-    // Evaluation fields
+  
     private Double approvedAmount;
     private Double interestRate;
     private String evaluationRemarks;

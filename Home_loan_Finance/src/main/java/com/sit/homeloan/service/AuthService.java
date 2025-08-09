@@ -1,8 +1,11 @@
 package com.sit.homeloan.service;
 
+import com.sit.homeloan.dto.ApiResponse;
+import com.sit.homeloan.dto.LoginRequest;
+import com.sit.homeloan.dto.RegisterRequest;
 import com.sit.homeloan.model.User;
 
 public interface AuthService {
-    String registerUser(User user);
-    String loginUser(String email, String password);
+	 ApiResponse registerUser(RegisterRequest request);
+	    ApiResponse loginUser(LoginRequest request);
 }

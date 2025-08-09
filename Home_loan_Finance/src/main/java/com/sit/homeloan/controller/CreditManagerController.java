@@ -4,11 +4,12 @@ import com.sit.homeloan.dto.LoanApplicationDTO;
 import com.sit.homeloan.dto.LoanApplicationDetailsDTO;
 import com.sit.homeloan.dto.LoanApplicationforsanctionDTO;
 import com.sit.homeloan.dto.LoanWithDocumentsDTO;
-import com.sit.homeloan.model.Document;
+import com.sit.homeloan.model.Documents;
 import com.sit.homeloan.model.LoanApplication;
 import com.sit.homeloan.model.SanctionLetter;
 import com.sit.homeloan.service.CreditManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +38,13 @@ public class CreditManagerController {
 		creditManagerService.updateVerificationStatus(id, status);
 		return "Document status updated to: " + status.toUpperCase();
 	}
+	
+	
+	@GetMapping("/download-document")
+	public ResponseEntity<Resource> downloadDocument(@RequestParam String fileName) {
+	    return creditManagerService.downloadDocument(fileName);
+	}
+
 
 	@GetMapping("/applications-to-evaluate")
 	public ResponseEntity<List<LoanApplicationDTO>> getApplicationsToEvaluate() {
@@ -49,11 +57,11 @@ public class CreditManagerController {
 		creditManagerService.evaluateLoanApplication(loanAppId);
 		return "Loan application evaluated successfully!";
 	}
-	
-	 @GetMapping("/evaluated-applications")
-	    public List<LoanApplicationforsanctionDTO> getEvaluatedApplications() {
-	        return creditManagerService.getEvaluatedApplications();
-	    }
+
+	@GetMapping("/evaluated-applications")
+	public List<LoanApplicationforsanctionDTO> getEvaluatedApplications() {
+		return creditManagerService.getEvaluatedApplications();
+	}
 
 	@PostMapping("/sanction/{loanAppId}")
 	public SanctionLetter generateSanction(@PathVariable Long loanAppId, @RequestBody SanctionLetter request) {

@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Entity
 @Table(name = "documents")
-public class Document {
+public class Documents {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

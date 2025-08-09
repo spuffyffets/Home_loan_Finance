@@ -1,14 +1,14 @@
 package com.sit.homeloan.repository;
 
-import com.sit.homeloan.model.Document;
+import com.sit.homeloan.model.Documents;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface CreditManagerRepository extends JpaRepository<Document, Long> {
+public interface CreditManagerRepository extends JpaRepository<Documents, Long> {
 	
-    List<Document> getByCustomer_Id( Long customerId);
+    List<Documents> getByCustomer_Id( Long customerId);
     
 }

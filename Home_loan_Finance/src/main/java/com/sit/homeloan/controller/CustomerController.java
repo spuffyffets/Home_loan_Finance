@@ -3,11 +3,13 @@ package com.sit.homeloan.controller;
 import com.sit.homeloan.dto.CustomerProfileDTO;
 
 
+
 import com.sit.homeloan.dto.LoanApplicationDTO;
 import com.sit.homeloan.dto.LoanApplicationRequestDTO;
+import com.sit.homeloan.dto.SanctionDetailsDTO;
 import com.sit.homeloan.enums.DocumentType;
 import com.sit.homeloan.model.Customer;
-import com.sit.homeloan.model.Document;
+import com.sit.homeloan.model.Documents;
 import com.sit.homeloan.model.LoanApplication;
 import com.sit.homeloan.service.CustomerService;
 import org.springframework.core.io.Resource;
@@ -56,7 +58,7 @@ public class CustomerController {
 
 	@GetMapping("/my-documents")
 
-	public List<Document> getDocuments(@RequestParam String email) {
+	public List<Documents> getDocuments(@RequestParam String email) {
 		return customerService.getMyDocuments(email);
 	}
 
@@ -64,5 +66,27 @@ public class CustomerController {
 	public String deleteLoanApplication(@RequestParam Long applicationId, @RequestParam String email) {
 		return customerService.deleteLoanApplication(applicationId, email);
 	}
+	
+	
+	
+	 @GetMapping("/sanction-details/{loanAppId}")
+	    public ResponseEntity<SanctionDetailsDTO> getSanctionDetails(
+	            @RequestParam String email,
+	            @PathVariable Long loanAppId) {
+
+	        SanctionDetailsDTO dto = customerService.getSanctionDetailsByEmailAndLoanId(email, loanAppId);
+	        if (dto == null) {
+	            return ResponseEntity.notFound().build();
+	        }
+	        return ResponseEntity.ok(dto);
+	    }
+
+	    @GetMapping("/sanction-letter/download/{loanAppId}")
+	    public ResponseEntity<Resource> downloadSanctionLetterPdf(
+	            @RequestParam String email,
+	            @PathVariable Long loanAppId) {
+
+	        return customerService.downloadSanctionLetterPdfByEmailAndLoanId(email, loanAppId);
+	    }
 
 }

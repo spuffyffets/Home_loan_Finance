@@ -1,6 +1,7 @@
 package com.sit.homeloan.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sit.homeloan.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,9 +19,10 @@ public class User {
     private String fullName;
     private String email;
     private String phoneNumber;
+    @JsonIgnore
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING) 
     private Role role;
 
 //    private boolean enabled = true;

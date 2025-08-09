@@ -1,5 +1,7 @@
 package com.sit.homeloan.serviceimpl;
 
+import com.sit.homeloan.dto.DisbursementDTO;
+import com.sit.homeloan.dto.SanctionedLoanDTO;
 import com.sit.homeloan.enums.ApplicationStatus;
 import com.sit.homeloan.model.*;
 import com.sit.homeloan.repository.*;
@@ -12,83 +14,166 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class DisbursementServiceImpl implements DisbursementService {
 
-    @Autowired
-    private DisbursementRepository disbursementRepository;
-    
-    @Autowired
-    private LoanStageHistoryService loanStageHistoryService;
+	@Autowired
+	private DisbursementRepository disbursementRepository;
 
+	@Autowired
+	private LoanStageHistoryService loanStageHistoryService;
 
-    @Autowired
-    private LoanApplicationRepository loanApplicationRepository;
-    
-    @Override
-    public String disburseLoan(Long loanAppId, Double amount) {
-        Optional<LoanApplication> loanAppOpt = loanApplicationRepository.findById(loanAppId);
-        if (loanAppOpt.isEmpty()) {
-            return "Loan Application not found with ID: " + loanAppId;
-        }
+	@Autowired
+	private SanctionLetterRepository sanctionLetterRepository;
 
-        LoanApplication loanApp = loanAppOpt.get();
+	@Autowired
+	private LoanApplicationRepository loanApplicationRepository;
 
-        if (disbursementRepository.findByLoanApplication(loanApp).isPresent()) {
-            return "Disbursement already exists for this Loan Application.";
-        }
+	@Override
+	public String disburseLoan(Long loanAppId, Double amount) {
+		Optional<LoanApplication> loanAppOpt = loanApplicationRepository.findById(loanAppId);
+		if (loanAppOpt.isEmpty()) {
+			return "Loan Application not found with ID: " + loanAppId;
+		}
 
-        // Create new disbursement
-        Disbursement disbursement = new Disbursement();
-        disbursement.setLoanApplication(loanApp);
-        disbursement.setDisbursedAmount(amount);
-        disbursement.setDisbursementDate(LocalDate.now());
-        disbursement.setDisbursementStatus("DISBURSED");
-        disbursementRepository.save(disbursement);
+		LoanApplication loanApp = loanAppOpt.get();
 
-        // Update loan application status
-        loanApp.setApplicationStatus(ApplicationStatus.DISBURSED);
-        loanApplicationRepository.save(loanApp);
+		if (disbursementRepository.findByLoanApplication(loanApp).isPresent()) {
+			return "Disbursement already exists for this Loan Application.";
+		}
 
-        // Log loan stage
-        loanStageHistoryService.logStage(
-            loanApp.getId(),
-            "Disbursement Manager",
-            "DISBURSEMENT_MANAGER",
-            ApplicationStatus.DISBURSED.name(),
-            "Loan disbursed successfully."
-        );
+		SanctionLetter sanction = sanctionLetterRepository.findByLoanApplication_Id(loanAppId);
+		if (sanction == null) {
+			return "No sanction letter found for this Loan Application.";
+		}
+		if (amount > sanction.getSanctionedAmount()) {
+			return "Disbursement amount cannot exceed sanctioned amount.";
+		}
 
-        return "Loan Disbursed Successfully for LoanApp ID: " + loanAppId;
-    }
+		Disbursement disbursement = new Disbursement();
+		disbursement.setLoanApplication(loanApp);
+		disbursement.setDisbursedAmount(amount);
+		disbursement.setDisbursementDate(LocalDate.now());
+		disbursement.setDisbursementStatus("DISBURSED");
+		disbursementRepository.save(disbursement);
 
+		loanApp.setApplicationStatus(ApplicationStatus.DISBURSED);
+		loanApplicationRepository.save(loanApp);
 
+		loanStageHistoryService.logStage(loanApp.getId(), "Disbursement Manager", "DISBURSEMENT_MANAGER",
+				ApplicationStatus.DISBURSED.name(), "Loan disbursed successfully.");
 
-    @Override
-    public ResponseEntity<?> getByLoanAppId(Long loanAppId) {
-        Optional<LoanApplication> loanAppOpt = loanApplicationRepository.findById(loanAppId);
-        if (loanAppOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Loan Application not found");
-        }
+		return "Loan Disbursed Successfully for LoanApp ID: " + loanAppId;
+	}
 
-        Optional<Disbursement> disbOpt = disbursementRepository.findByLoanApplication(loanAppOpt.get());
-        if (disbOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("No disbursement found for LoanApp ID: " + loanAppId);
-        }
+	@Override
+	public ResponseEntity<?> getByLoanAppId(Long loanAppId) {
+		Optional<LoanApplication> loanAppOpt = loanApplicationRepository.findById(loanAppId);
+		if (loanAppOpt.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Loan Application not found");
+		}
 
-        return ResponseEntity.ok(disbOpt.get());
-    }
+		Optional<Disbursement> disbOpt = disbursementRepository.findByLoanApplication(loanAppOpt.get());
+		if (disbOpt.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body("No disbursement found for LoanApp ID: " + loanAppId);
+		}
 
-    @Override
-    public Disbursement getDisbursementObjectByLoanAppId(Long loanAppId) {
-        Optional<LoanApplication> loanAppOpt = loanApplicationRepository.findById(loanAppId);
-        if (loanAppOpt.isEmpty()) return null;
+		return ResponseEntity.ok(disbOpt.get());
+	}
 
-        return disbursementRepository.findByLoanApplication(loanAppOpt.get()).orElse(null);
-    }
+	@Override
+	public Disbursement getDisbursementObjectByLoanAppId(Long loanAppId) {
+		Optional<LoanApplication> loanAppOpt = loanApplicationRepository.findById(loanAppId);
+		if (loanAppOpt.isEmpty())
+			return null;
+
+		return disbursementRepository.findByLoanApplication(loanAppOpt.get()).orElse(null);
+	}
+
+	@Override
+	public List<SanctionedLoanDTO> getSanctionedApplications() {
+		List<LoanApplication> sanctionedApps = loanApplicationRepository
+				.findByApplicationStatus(ApplicationStatus.SANCTIONED);
+
+		List<SanctionedLoanDTO> result = new ArrayList<>();
+
+		for (LoanApplication app : sanctionedApps) {
+			SanctionedLoanDTO dto = new SanctionedLoanDTO();
+			dto.setLoanAppId(app.getId());
+
+			if (app.getCustomer() != null && app.getCustomer().getUser() != null) {
+				dto.setApplicantName(app.getCustomer().getUser().getFullName());
+			}
+
+			dto.setLoanAmount(app.getLoanAmount());
+
+			SanctionLetter sanction = sanctionLetterRepository.findByLoanApplication_Id(app.getId());
+
+			if (sanction != null) {
+				dto.setApprovedAmount(sanction.getSanctionedAmount());
+				dto.setInterestRate(sanction.getInterestRate());
+				dto.setTenureMonths(sanction.getTenureInMonths());
+				dto.setSanctionDate(sanction.getIssueDate());
+			}
+
+			result.add(dto);
+		}
+
+		return result;
+	}
+
+	@Override
+	public SanctionedLoanDTO getSanctionedApplicationDetails(Long loanAppId) {
+		Optional<LoanApplication> appOpt = loanApplicationRepository.findById(loanAppId);
+		if (appOpt.isEmpty() || appOpt.get().getApplicationStatus() != ApplicationStatus.SANCTIONED) {
+			return null;
+		}
+
+		LoanApplication app = appOpt.get();
+		SanctionedLoanDTO dto = new SanctionedLoanDTO();
+
+		dto.setLoanAppId(app.getId());
+
+		if (app.getCustomer() != null && app.getCustomer().getUser() != null) {
+			dto.setApplicantName(app.getCustomer().getUser().getFullName());
+		}
+
+		dto.setLoanAmount(app.getLoanAmount());
+
+		SanctionLetter sanction = sanctionLetterRepository.findByLoanApplication_Id(app.getId());
+
+		if (sanction != null) {
+			dto.setApprovedAmount(sanction.getSanctionedAmount());
+			dto.setInterestRate(sanction.getInterestRate());
+			dto.setTenureMonths(sanction.getTenureInMonths());
+			dto.setSanctionDate(sanction.getIssueDate());
+		}
+
+		return dto;
+	}
+
+	@Override
+	public List<DisbursementDTO> getProcessedDisbursements() {
+	    List<LoanApplication> loanApps = loanApplicationRepository.findByApplicationStatus(ApplicationStatus.DISBURSED);
+	    List<DisbursementDTO> dtos = new ArrayList<>();
+	    for (LoanApplication loan : loanApps) {
+	        DisbursementDTO dto = new DisbursementDTO();
+	        dto.setId(loan.getId());
+	        dto.setLoanAppId(loan.getId());
+	        dto.setApplicantName(loan.getCustomer().getUser().getFullName()); 
+	        dto.setLoanAmount(loan.getLoanAmount());
+	        dto.setApprovedAmount(loan.getSanctionLetter().getSanctionedAmount()); 
+	        dto.setDisbursedAmount(loan.getDisbursement().getDisbursedAmount()); 
+	        dto.setDisbursementDate(loan.getDisbursement().getDisbursementDate());
+	        dto.setDisbursementStatus(loan.getApplicationStatus().name());
+	        dtos.add(dto);
+	    }
+	    return dtos;
+	}
 
 }
