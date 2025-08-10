@@ -24,12 +24,12 @@ This is the backend API for the Home Loan Finance Management System built with S
 ---
 
 ## 🧑‍💻 Technologies Used
-Java 17+ / Spring Boot
-Spring Security (JWT)
-Hibernate / JPA
-Maven
-MySQL
-RESTful APIs
+- Java 17+ / Spring Boot
+- Spring Security (JWT)
+- Hibernate / JPA
+- Maven
+- MySQL
+- RESTful APIs
 
 ## 📂 Project Structure (Backend)
 
