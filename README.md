@@ -86,7 +86,11 @@ spring.datasource.username=YourUserName
 spring.datasource.password=YourPassword
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.jpa.show-sql: true
-
+```
+- Make sure the database home_loan exists. If not, create it:
+```bash
+CREATE DATABASE home_loan;
+```
 
 ## 🔗 Frontend Repo
 - Make sure to clone and run the frontend application separately for the full system:
